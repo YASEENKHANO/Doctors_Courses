@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dr. Smith's Medical Academy</title>
+  <style>
+    :root {
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --bg-slate: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --success: #16a34a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-slate);
+      color: var(--text-main);
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    header h1 {
+      font-size: 2.25rem;
+      color: #0f172a;
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+    }
+
+    .reset-btn {
+      margin-top: 1rem;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      text-decoration: underline;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    .courses-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-body {
+      padding: 1.5rem;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .badge {
+      display: inline-block;
+      align-self: flex-start;
+      padding: 0.25rem 0.6rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 9999px;
+      margin-bottom: 0.75rem;
+      text-transform: uppercase;
+    }
+
+    .badge-locked {
+      background: #fef2f2;
+      color: #dc2626;
+    }
+
+    .badge-unlocked {
+      background: #f0fdf4;
+      color: var(--success);
+    }
+
+    .card h3 {
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .card p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 1.5rem;
+      flex-grow: 1;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--border-color);
+      padding-top: 1rem;
+    }
+
+    .price {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .btn {
+      padding: 0.6rem 1.2rem;
+      border-radius: 6px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .btn-success {
+      background-color: var(--success);
+      color: white;
+    }
+
+    /* Course Detail Page View (When opened in a tab) */
+    .course-page {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+    }
+
+    .video-wrapper {
+      position: relative;
+      padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+      height: 0;
+      margin: 1.5rem 0;
+      background: #000;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .video-wrapper iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+
+    .content-block {
+      margin-top: 1.5rem;
+      line-height: 1.8;
+      color: #334155;
+    }
+
+    .content-block h3 {
+      margin: 1.5rem 0 0.5rem 0;
+      color: #0f172a;
+    }
+
+    .content-block p {
+      margin-bottom: 1rem;
+    }
+
+    .error-msg {
+      text-align: center;
+      padding: 3rem;
+      color: #dc2626;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container" id="app"></div>
+
+  <script>
+    // Database of 7 Demo Medical Courses
+    const courses = [
+      {
+        id: "ecg-masterclass",
+        title: "ECG Interpretation Masterclass",
+        description: "Identify lethal arrhythmias, ischemic patterns, and conduction blocks in under 30 seconds.",
+        price: "$49",
+        embedVideo: "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ",
+        content: `
+          <h3>Systematic ECG Reading Strategy</h3>
+          <p>Electrocardiography interpretation requires a disciplined, step-by-step approach to avoid missing critical ischemic or electrical abnormalities. Always follow a standardized sequence: Rate, Rhythm, Axis, Intervals, and Waveform Morphology.</p>
+          
+          <h3>Key diagnostic parameters:</h3>
+          <p><strong>1. PR Interval:</strong> Normal duration is 120–200 ms (3 to 5 small squares). Prolongation beyond 200 ms indicates a first-degree AV block.</p>
+          <p><strong>2. QRS Duration:</strong> Should remain under 120 ms. A widened QRS (>120 ms) points to intraventricular conduction delays such as RBBB or LBBB.</p>
+          <p><strong>3. ST Segment Evaluation:</strong> Look for ST-elevation of ≥1 mm in two contiguous leads to suspect acute myocardial infarction.</p>
+        `
+      },
+      {
+        id: "pediatric-triage",
+        title: "Pediatric Triage & Emergency Care",
+        description: "A clinical guide to rapid pediatric assessment, vital signs evaluation, and emergency triage prioritization.",
+        price: "$39",
+        embedVideo: "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ",
+        content: `
+          <h3>The Pediatric Assessment Triangle (PAT)</h3>
+          <p>The PAT is an essential rapid assessment tool allowing clinicians to evaluate a pediatric patient within 30 seconds without touching them. It relies on three primary components: Appearance, Work of Breathing, and Circulation to Skin.</p>
+
+          <h3>Clinical Implementation:</h3>
+          <p><strong>Appearance:</strong> Evaluate muscle tone, interactability, consolability, look/gaze, and speech/cry (TICLS mnemonic).</p>
+          <p><strong>Work of Breathing:</strong> Check for tachypnea, nasal flaring, intercostal retractions, head bobbing, or audible stridor.</p>
+          <p><strong>Circulation:</strong> Look for pallor, mottling, or cyanosis indicative of poor tissue perfusion.</p>
+        `
+      },
+      {
+        id: "antibiotic-stewardship",
+        title: "Practical Antibiotic Stewardship",
+        description: "Master empirical antimicrobial coverage, resistance patterns, and de-escalation strategies.",
+        price: "$59",
+        embedVideo: "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ",
+        content: `
+          <h3>Principles of Empirical Antibiotic Selection</h3>
+          <p>Antibiotic stewardship focuses on choosing the appropriate narrow-spectrum agent based on suspected infection site, community vs. hospital acquisition, and localized resistance patterns.</p>
+
+          <h3>Core Guidelines:</h3>
+          <p><strong>Culture First:</strong> Always obtain blood, urine, or tissue cultures prior to administering the first dose of antimicrobial therapy whenever clinically feasible.</p>
+          <p><strong>48-Hour Reassessment:</strong> Evaluate culture sensitivities at the 48-hour mark to systematically de-escalate broad-spectrum coverage to targeted therapy.</p>
+        `
+      },
+      {
+        id: "icu-mechanical-ventilation",
+        title: "Mechanical Ventilation in ICU",
+        description: "Understand ventilator modes, initial setup parameters, and troubleshooting ventilator dyssynchrony.",
+        price: "$79",
+        embedVideo: "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ",
+        content: `
+          <h3>Initial Setup in Acute Respiratory Failure</h3>
+          <p>Initiating mechanical ventilation requires selecting modes based on lung compliance and patient effort. The primary goal in ARDS is lung-protective ventilation.</p>
+
+          <h3>Standard Settings Protocol:</h3>
+          <p><strong>Tidal Volume:</strong> Target 4–8 mL/kg of Predicted Body Weight (PBW), not actual body weight, to prevent volutrauma.</p>
+          <p><strong>Plateau Pressure:</strong> Maintain plateau pressure (Pplat) below 30 cm H₂O to minimize barotrauma risks.</p>
+          <p><strong>PEEP Titration:</strong> Set Positive End-Expiratory Pressure to prevent alveolar collapse during end-expiration.</p>
+        `
+      },
+      {
+        id: "radiology-chest-ct",
+        title: "Chest CT Imaging Fundamentals",
+        description: "Learn systematic reading of chest CT scans including pulmonary nodules, embolism, and parenchymal diseases.",
+        price: "$69",
+        embedVideo: "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ",
+        content: `
+          <h3>A Structured Approach to Chest CT Analysis</h3>
+          <p>When reviewing a computed tomography scan of the chest, systematically review lung windows, mediastinal windows, and bone windows separately.</p>
+
+          <h3>Key Diagnostic Markers:</h3>
+          <p><strong>Pulmonary Embolism:</strong> Identify filling defects within contrast-enhanced pulmonary arterial branches on CT Pulmonary Angiogram (CTPA).</p>
+          <p><strong>Ground-Glass Opacities (GGO):</strong> Differentiate partial filling of air spaces from complete consolidation where underlying vascular structures remain visible.</p>
+        `
+      },
+      {
+        id: "suture-wound-closure",
+        title: "Suturing & Surgical Wound Closure",
+        description: "Hands-on techniques for simple interrupted, mattress sutures, sub-cuticular closure, and wound care.",
+        price: "$29",
+        embedVideo: "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ",
+        content: `
+          <h3>Principles of Wound Closure</h3>
+          <p>Achieving optimal cosmetic and functional wound healing requires precise tissue apposition without tension or vascular compromise.</p>
+
+          <h3>Suture Material Selection:</h3>
+          <p><strong>Absorbable Sutures:</strong> Use Vicryl or Monocryl for deep dermal layer closure to reduce tension on skin edges.</p>
+
+          <p><strong>Non-Absorbable Sutures:</strong> Use Nylon or Prolene for epidermal closure. Ensure suture removal timelines are adhered to (e.g., 3-5 days for face, 10-14 days for extremities).</p>
+        `
+      },
+      {
+        id: "hypertension-management",
+        title: "Hypertension & Cardiovascular Risk",
+        description: "Evidence-based management of essential hypertension, hypertensive crises, and drug selection guidelines.",
+        price: "$45",
+        embedVideo: "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ",
+        content: `
+          <h3>Therapeutic Approach to Primary Hypertension</h3>
+          <p>Effective blood pressure management drastically lowers long-term cardiovascular events, stroke risks, and renal decline.</p>
+
+          <h3>First-Line Pharmacotherapy:</h3>
+          <p><strong>First-Line Drug Classes:</strong> ACE inhibitors / ARBs, Calcium Channel Blockers (CCBs), and Thiazide-like diuretics.</p>
+
+          <p><strong>Comorbidity Considerations:</strong> Prefer ACE inhibitors or ARBs as initial therapy in non-black patients with diabetes mellitus or chronic kidney disease with proteinuria.</p>
+        `
+      }
+    ];
+
+    // Check purchase status in LocalStorage
+    function isPurchased(courseId) {
+      return localStorage.getItem(courseId) === "true";
+    }
+
+    function buyCourse(courseId) {
+      const course = courses.find(c => c.id === courseId);
+      const confirmed = confirm(`Simulate purchasing "${course.title}" for ${course.price}?`);
+      if (confirmed) {
+        localStorage.setItem(courseId, "true");
+        // Open the newly unlocked course in a new tab immediately
+        window.open(`?course=${courseId}`, '_blank');
+        renderApp();
+      }
+    }
+
+    function resetDemo() {
+      localStorage.clear();
+      window.location.href = window.location.pathname;
+    }
+
+    // Main Renderer
+    function renderApp() {
+      const app = document.getElementById("app");
+      const urlParams = new URLSearchParams(window.location.search);
+      const selectedCourseId = urlParams.get("course");
+
+      // SCENARIO 1: Viewing a specific course page (e.g., inside the new tab)
+      if (selectedCourseId) {
+        const course = courses.find(c => c.id === selectedCourseId);
+        
+        if (!course) {
+          app.innerHTML = `<div class="error-msg"><h2>Course Not Found</h2></div>`;
+          return;
+        }
+
+        if (!isPurchased(course.id)) {
+          app.innerHTML = `
+            <div class="course-page" style="text-align: center;">
+              <h2 style="color: #dc2626; margin-bottom: 1rem;">🔒 Course Locked</h2>
+              <p>You have not purchased <strong>${course.title}</strong> yet.</p>
+              <br>
+              <button class="btn btn-primary" onclick="window.close()">Close Tab</button>
+            </div>
+          `;
+          return;
+        }
+
+        // Render full unlocked course in this tab
+        app.innerHTML = `
+          <div class="course-page">
+            <h1 style="margin-bottom: 0.5rem; font-size: 2rem;">${course.title}</h1>
+            <p style="color: var(--text-muted);">${course.description}</p>
+            
+            <div class="video-wrapper">
+              <iframe src="${course.embedVideo}" allowfullscreen></iframe>
+            </div>
+
+            <div class="content-block">
+              ${course.content}
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      // SCENARIO 2: Main Catalog View
+      let html = `
+        <header>
+          <h1>Dr. Smith's Medical Academy</h1>
+          <p>Select a course below to purchase or open unlocked training modules.</p>
+          <button class="reset-btn" onclick="resetDemo()">[Demo] Reset All Purchases</button>
+        </header>
+        <div class="courses-grid">
+      `;
+
+      courses.forEach(course => {
+        const unlocked = isPurchased(course.id);
+        
+        html += `
+          <div class="card">
+            <div class="card-body">
+              <span class="badge ${unlocked ? 'badge-unlocked' : 'badge-locked'}">
+                ${unlocked ? 'Unlocked' : 'Locked'}
+              </span>
+              <h3>${course.title}</h3>
+              <p>${course.description}</p>
+              <div class="card-footer">
+                <span class="price">${course.price}</span>
+                ${
+                  unlocked
+                    ? `<a href="?course=${course.id}" target="_blank" class="btn btn-success">Open in New Tab ↗</a>`
+                    : `<button onclick="buyCourse('${course.id}')" class="btn btn-primary">Buy & Unlock</button>`
+                }
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      html += `</div>`;
+      app.innerHTML = html;
+    }
+
+    // Initialize application state
+    renderApp();
+  </script>
+</body>
+</html>
